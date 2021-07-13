@@ -57,6 +57,8 @@
           .catch(e => {
             this.emitError(e)
           })
+        } else {
+          this.jsonObject = {}
         }
       },
       emitError(error) {
