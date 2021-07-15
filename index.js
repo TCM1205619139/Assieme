@@ -1,12 +1,11 @@
 import 'normalize.css'
 import './assets/icon/css/font-awesome.min.css'
-import Button from './packages/Button/index'
-import CodePiece from './packages/CodePiece/index'
+import AJSON from './packages/AJSON/index'
 
 const Assieme = {}
+
 const COMPONENTS = [
-  Button,
-  CodePiece
+  AJSON
 ]
 
 Assieme.install = function (Vue, options = {}) {
