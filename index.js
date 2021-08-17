@@ -1,11 +1,13 @@
 import 'normalize.css'
 import './assets/icon/css/font-awesome.min.css'
 import AJSON from './packages/AJSON/index'
+import Carousel from './packages/Carousel/index'
 
 const Assieme = {}
 
 const COMPONENTS = [
-  AJSON
+  AJSON,
+  Carousel
 ]
 
 Assieme.install = function (Vue, options = {}) {
