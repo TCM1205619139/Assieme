@@ -24,7 +24,7 @@
   import { string2Object } from './func'
 
   export default {
-    name: "CodePiece",
+    name: "AJSON",
     components: {
       CodeBlock,
     },
@@ -77,8 +77,8 @@
           for(let i=0; i<this.tap; i++) {
             startString += ' '
           }
+
           node.value = startString + endString;
-          
           node.selectionStart = selectionStart + 4;
           node.selectionEnd = selectionEnd + 4
         }
@@ -86,7 +86,6 @@
     },
     watch: {
       jsonObject(newValue, oldValue) {  // 这里需要处理一下json对象解析错误的情况
-
         this.$emit('code-change', this.jsonObject)
       }
     }

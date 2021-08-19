@@ -1,6 +1,6 @@
 {
   "name": "assieme",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -28,6 +28,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "normalize.css": "^8.0.1"
+    "normalize.css": "^8.0.1",
+    "three": "^0.130.1"
   }
 }
