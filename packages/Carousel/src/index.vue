@@ -5,7 +5,7 @@
        @mouseover="pauseRolling"
   >
     <div :class="'carousel-item-'+direction">
-      <slot name="carouse-item"></slot>
+      <slot></slot>
     </div>
   </div>
 </template>
