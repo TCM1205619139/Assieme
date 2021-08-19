@@ -1,8 +1,13 @@
 <template>
-  <div class="carousel-container" :class="'carousel-container-'+direction"
-       ref="carousel"
-       @mouseleave="startRolling"
-       @mouseover="pauseRolling"
+  <div class="carousel-container"
+   :class="{
+     'carousel-container-hover': isHover,
+     'carousel-container-vertical': isVertical,
+     'carousel-container-horizontal': !isVertical
+   }"
+   ref="carousel"
+   @mouseleave="mouseleaveHandler"
+   @mouseover="mouseoverHandler"
   >
     <div :class="'carousel-item-'+direction">
       <slot></slot>
@@ -14,6 +19,9 @@
   export default {
     carousel: null,
     animationFrame: null,
+    scrollKey: '',
+    scrollSizeKey: '',
+    clientKey: '',
     name: "CarouselAlarm",
     props: {
       direction: {
@@ -35,31 +43,49 @@
         default: 3  // second
       }
     },
-    mounted() {
+    data () {
+      return {
+        isHover: false,
+        isVertical: this.direction === 'vertical'
+      }
+    },
+    mounted () {
       if (!this.carousel) this.carousel = this.$refs.carousel
-      this.startRolling()
+      this.setScrollDirection()
     },
     methods: {
+      mouseleaveHandler () {
+        console.log();
+        this.isHover = false
+        this.startRolling()
+      },
+      mouseoverHandler () {
+        this.isHover = true
+        this.pauseRolling()
+      },
+      setScrollDirection () {
+        if (this.direction === 'vertical') {
+          this.scrollKey = 'scrollTop',
+          this.scrollSizeKey = 'scrollHeight',
+          this.clientKey = 'clientHeight'
+        } else {
+          this.scrollKey = 'scrollLeft'
+          this.scrollSizeKey = 'scrollWidth'
+          this.clientKey = 'clientWidth'
+        }
+
+        this.startRolling()
+      },
       startRolling () {
-        this.direction === 'vertical'
-          ? this.rollingY()
-          : this.rollingX()
+        const scrollKey = this.carousel[this.scrollKey]
+        const scrollSizeKey = this.carousel[this.scrollSizeKey]
+        const clientKey = this.carousel[this.clientKey]
+
+        if (scrollKey + clientKey < scrollSizeKey) {
+          this.carousel[this.scrollKey] += this.speed
+        }
 
         this.animationFrame = requestAnimationFrame(this.startRolling)
-      },
-      rollingX () {
-        const {scrollLeft, scrollWidth, clientWidth} = this.carousel
-
-        if (scrollLeft + clientWidth < scrollWidth) {
-          this.carousel.scrollLeft += this.speed
-        }
-      },
-      rollingY () {
-        const {scrollTop, scrollHeight, clientHeight} = this.carousel
-
-        if (scrollTop + clientHeight < scrollHeight) {
-          this.carousel.scrollTop += this.speed
-        }
       },
       pauseRolling () {
         cancelAnimationFrame(this.animationFrame)
@@ -76,17 +102,20 @@
     height: 100%;
     display: flex;
     animation: layout;
-    overflow: auto;
+    overflow: hidden;
     user-select: none;
   }
+  .carousel-container-hover {
+    overflow: auto;
+  }
   .carousel-container-vertical::-webkit-scrollbar {/*滚动条整体样式*/
-    width: 0px;     /*高宽分别对应横竖滚动条的尺寸*/
+    width: 5px;     /*高宽分别对应横竖滚动条的尺寸*/
     height: 4px;
     scrollbar-arrow-color:red;
   }
   .carousel-container-horizontal::-webkit-scrollbar {/*滚动条整体样式*/
     width: 5px;     /*高宽分别对应横竖滚动条的尺寸*/
-    height: 0;
+    height: 4px;
     scrollbar-arrow-color:red;
   }
   .carousel-container::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
