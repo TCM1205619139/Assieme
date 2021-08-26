@@ -1,14 +1,14 @@
 <template>
   <div class="carousel-container"
-   :class="{
+       :class="{
      'carousel-container-hover': isHover,
      'carousel-container-vertical': isVertical,
      'carousel-container-horizontal': !isVertical
    }"
-   ref="carousel"
-   @mouseleave="mouseleaveHandler"
-   @mouseover="mouseoverHandler"
-   @scroll="listenScrollFn"
+       ref="carousel"
+       @mouseleave="mouseleaveFn"
+       @mouseover="mouseoverFn"
+       @scroll="listenScrollFn"
   >
     <div :class="'carousel-item-'+direction" ref="itemList">
       <slot></slot>
@@ -17,13 +17,15 @@
 </template>
 
 <script>
+  import { sleep } from '@/common/tool'
+
   export default {
-    carousel: null,
-    rollingTimer: null,
-    pauseTimer: null,
+    firstChild: null,
+    lastChild: null,
+    carousel: null, // overflow容器DOM
+    rollingTimer: null, // 滚动定时器，用于绑定 requestAnimationFrame
+    pauseTimer: null, // 暂停定时器，用于绑定 setTimeout
     name: "CarouselAlarm",
-    top: 0,
-    left: 0,
     props: {
       direction: {
         type: String,
@@ -48,68 +50,148 @@
       return {
         isHover: false,
         isVertical: this.direction === 'vertical',
-        curItemIndex: 0,
-        rollingState: false,
+        rollingState: false,  // 滚动状态,
+        onEnd: false, // 滚动至最后一个元素停止
+        headItemIndex: 0,
+        bottomItemIndex: null,
+        targetItemIndex: 1
       }
     },
     mounted () {
-      if (!this.carousel) this.carousel = this.$refs.carousel
+      this.carousel = this.$refs.carousel
+      this.lastChild = this.$refs.itemList.lastChild
+      this.firstChild = this.$refs.itemList.firstChild
 
       const rect = this.$refs.itemList.getBoundingClientRect()
+      const firstRect = this.$refs.itemList.firstChild.getBoundingClientRect()
 
-      this.rollingState = true
-      this.top = rect.top
-      this.left = rect.left
+      if (this.isVertical && firstRect.bottom < rect.bottom) {
+        this.top = rect.top
+        this.bottom = rect.bottom
+      } else if (!this.isVertical && firstRect.right < rect.right) {
+        this.left = rect.left
+        this.right = rect.right
+      }
+
+      this.startRolling()
     },
     methods: {
-      mouseleaveHandler () {
+      mouseleaveFn () {
         this.isHover = false
         this.rollingState = true
+        this.startRolling()
       },
-      mouseoverHandler () {
+      mouseoverFn () {
         this.isHover = true
         this.rollingState = false
+        this.pauseRolling()
       },
       listenScrollFn () {
-        const rect = this.$refs.itemList.firstChild.getBoundingClientRect()
+        const firstRect = this.firstChild.getBoundingClientRect()
+        const rect = this.carousel.getBoundingClientRect()
 
-        if (this.direction === 'vertical') {
-          this.curItemIndex = Math.floor((this.top - rect.top) / rect.height)
+        if (this.isVertical) {
+          this.bottomItemIndex = Math.ceil((rect.bottom - firstRect.bottom) / firstRect.height)
+          this.headItemIndex = Math.floor((rect.top - firstRect.top) / firstRect.height)
         } else {
-          this.curItemIndex = Math.floor((rect.left - this.left) / rect.width)
+          this.bottomItemIndex = Math.ceil((rect.right - firstRect.right) / firstRect.width)
+          this.headItemIndex = Math.ceil((rect.left - firstRect.left) / firstRect.width)
         }
+        if (this.headItemIndex !== this.targetItemIndex - 1 && !this.onEnd) {
+          this.targetItemIndex = this.headItemIndex + 1
+          this.pauseRolling()
+        }
+
       },
       startRolling () {
-        this.direction === 'vertical'
-        ? this.rollingY()
-        : this.rollingX()
+        this.pauseTimer = clearTimeout(this.pauseTimer)
+        this.rollingTimer = cancelAnimationFrame(this.rollingTimer)
+        this.rollingState = true
+
+        this.isVertical
+          ? this.rollingToY(this.headItemIndex + 1)
+          : this.rollingToX(this.headItemIndex + 1)
+      },
+      rollingToX () {
+        const lastRect = this.lastChild.getBoundingClientRect()
+        const rect = this.carousel.getBoundingClientRect()
+
+        if (lastRect.right <= rect.right) { // 滚动到最底部
+          this.onEnd = true
+          sleep(this.backRollingX, this.pauseTime)
+        } else {
+          this.carousel.scrollLeft += this.speed
+          this.rollingTimer = requestAnimationFrame(() => {
+            this.rollingToX(this.targetItemIndex)
+          })
+        }
+      },
+      rollingToY () {
+        const lastRect = this.lastChild.getBoundingClientRect()
+        const rect = this.carousel.getBoundingClientRect()
+
+        if (lastRect.bottom <= rect.bottom) { // 滚动到最底部
+          this.onEnd = true
+          sleep(this.backRollingY, this.pauseTime)
+        } else {
+          this.carousel.scrollTop += this.speed
+          this.rollingTimer = requestAnimationFrame(() => {
+            this.rollingToY(this.targetItemIndex)
+          })
+        }
+      },
+      backRollingX () {
+        const firstRect = this.firstChild.getBoundingClientRect()
+        const rect = this.carousel.getBoundingClientRect()
+
+        const scap = firstRect.left - rect.left
+        const speed = Math.ceil( -scap / 15) + 1
+
+        if (scap >= -1) {  // 已经滚动到头部
+          this.carousel.scrollLeft = 0
+          this.onEnd = false
+          this.rollingTimer = cancelAnimationFrame(this.rollingTimer)
+          this.pauseRolling()
+        } else {
+          this.carousel.scrollLeft -= speed
+          this.rollingTimer = requestAnimationFrame(this.backRollingX)
+        }
+      },
+      backRollingY () {
+        const firstRect = this.firstChild.getBoundingClientRect()
+        const rect = this.carousel.getBoundingClientRect()
+
+        const scap = firstRect.top - rect.top
+        const speed = Math.ceil( -scap / 15) + 1
+
+        if (scap >= -1) {  // 已经滚动到头部
+          this.carousel.scrollTop = 0
+          this.onEnd = false
+          this.rollingTimer = cancelAnimationFrame(this.rollingTimer)
+          this.pauseRolling()
+        } else {
+          this.carousel.scrollTop -= speed
+          this.rollingTimer = requestAnimationFrame(this.backRollingY)
+        }
       },
       pauseRolling () {
-        this.rollingTimer = cancelAnimationFrame(this.rollingTimer)
-        this.pauseTimer = clearTimeout(this.pauseTimer)
-      },
-      rollingX () {
-        this.carousel.scrollLeft += this.speed
-        this.rollingTimer = requestAnimationFrame(this.rollingX)
-      },
-      rollingY () {
-        this.carousel.scrollTop += this.speed
-        this.rollingTimer = requestAnimationFrame(this.rollingY)
+        this.rollingState = false
+
+        cancelAnimationFrame(this.rollingTimer)
+        clearTimeout(this.pauseTimer)
+
+        this.pauseTimer = setTimeout(this.startRolling, this.pauseTime)
       }
     },
     watch: {
-      rollingState (newValue) {
-        if (newValue) {
-          this.startRolling()
-        } else {
-          this.pauseRolling()
-          this.pauseTimer = setTimeout(() => {
-            this.rollingState = true
-          }, this.pauseTime)
-        }
+      bottomItemIndex (index) {
+        this.$emit('bottom-change', index)
       },
-      curItemIndex () {
-        this.rollingState = false
+      headItemIndex (index) {
+        this.$emit('top-change', index)
+      },
+      onEnd (value) {
+        if (value) this.$emit('on-end', value)
       }
     }
   }
