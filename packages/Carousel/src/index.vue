@@ -180,7 +180,7 @@
         cancelAnimationFrame(this.rollingTimer)
         clearTimeout(this.pauseTimer)
 
-        this.pauseTimer = setTimeout(this.startRolling, this.pauseTime)
+        this.pauseTimer = !this.isHover && setTimeout(this.startRolling, this.pauseTime)
       }
     },
     watch: {
