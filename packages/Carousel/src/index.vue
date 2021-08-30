@@ -1,14 +1,14 @@
 <template>
   <div class="carousel-container"
-       :class="{
+   :class="{
      'carousel-container-hover': isHover,
      'carousel-container-vertical': isVertical,
      'carousel-container-horizontal': !isVertical
    }"
-       ref="carousel"
-       @mouseleave="mouseleaveFn"
-       @mouseover="mouseoverFn"
-       @scroll="listenScrollFn"
+     ref="carousel"
+     @mouseleave="mouseleaveFn"
+     @mouseover="mouseoverFn"
+     @scroll="listenScrollFn"
   >
     <div :class="'carousel-item-'+direction" ref="itemList">
       <slot></slot>
@@ -109,8 +109,8 @@
         this.rollingState = true
 
         this.isVertical
-          ? this.rollingToY(this.headItemIndex + 1)
-          : this.rollingToX(this.headItemIndex + 1)
+        ? this.rollingToY(this.targetItemIndex)
+        : this.rollingToX(this.targetItemIndex)
       },
       rollingToX () {
         const lastRect = this.lastChild.getBoundingClientRect()
