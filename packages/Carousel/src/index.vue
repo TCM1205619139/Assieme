@@ -18,8 +18,6 @@
 </template>
 
 <script>
-import { sleep } from '@/common/tool'
-
 export default {
   rollingTimer: null, // 滚动定时器，用于绑定 requestAnimationFrame
   pauseTimer: null, // 暂停定时器，用于绑定 setTimeout
@@ -53,14 +51,17 @@ export default {
     this.onEnd = false // 滚动至最后一个元素停止
     this.headItemIndex = 0 // 滚动值第几个子元素
     return {
+      // rollingState: false, // 滚动状态,
+      // onEnd: false, // 滚动至最后一个元素停止
+      // headItemIndex: 0, // 滚动值第几个子元素
       isHover: false, // 鼠标是否移入
       isVertical: this.direction === 'vertical',
     }
   },
   mounted() {
     this._carousel = this.$refs.carousel
-    this._itemNum = this.$refs.itemList.children.length
-    this._itemRect = this.cloneRect(this.$refs.itemList.firstChild.getBoundingClientRect())
+    this._itemList = this.$refs.itemList
+    this._itemRect = this.cloneRect(this._itemList.firstChild.getBoundingClientRect())
     this._carouselRect = this.cloneRect(this._carousel.getBoundingClientRect())
 
     this.startRolling()
@@ -82,6 +83,8 @@ export default {
     mouseoverFn() {
       this.isHover = true
       this.rollingState = false
+      this.onEnd = false
+      this.pauseTimer = clearTimeout(this.pauseTimer)
     },
     listenScrollFn(e) {
       this.rollingState = true
@@ -93,7 +96,7 @@ export default {
 
       if (this.isHover) {
         // 鼠标滚轮滚动需要更新itemRect的信息
-        this._itemRect = this.cloneRect(this.$refs.itemList.firstChild.getBoundingClientRect())
+        this._itemRect = this.cloneRect(this._itemList.firstChild.getBoundingClientRect())
       }
 
       if (this.headItemIndex !== headItemIndex) {
@@ -102,9 +105,8 @@ export default {
       }
     },
     startRolling() {
-      // this.pauseTimer = clearTimeout(this.pauseTimer)
-      // this.rollingTimer = cancelAnimationFrame(this.rollingTimer)
       // 所有子元素的高度足撑开元素，才需要滚动
+      this._itemNum = this._itemList.children.length
       if (this.isVertical && this._itemRect.height * this._itemNum > this._carouselRect.height) {
         this.rollingToY()
       } else if (!this.isVertical && this._itemRect.width * this._itemNum > this._carouselRect.width) {
@@ -115,7 +117,7 @@ export default {
       if (this.onEnd || this.isHover) {
         this.rollingState = false
         this.rollingTimer = cancelAnimationFrame(this.rollingTimer)
-        sleep(this.backRollingX, this.pauseTime)
+        this.pauseTimer = setTimeout(this.backRollingX, this.pauseTime)
       } else if (!this.onEnd && !this.isHover) {
         this._itemRect.left -= this.speed
         this._itemRect.right -= this.speed
@@ -129,7 +131,7 @@ export default {
       if (this.onEnd && !this.isHover) {
         this.rollingState = false
         this.rollingTimer = cancelAnimationFrame(this.rollingTimer)
-        sleep(this.backRollingY, this.pauseTime)
+        this.pauseTimer = setTimeout(this.backRollingY, this.pauseTime)
       } else if (!this.onEnd && !this.isHover) {
         this._itemRect.top -= this.speed
         this._itemRect.bottom -= this.speed
@@ -140,7 +142,6 @@ export default {
       }
     },
     backRollingX() {
-      console.log('backRollingX')
       const firstRect = this._itemRect
       const rect = this._carouselRect
       const scap = firstRect.left - rect.left
@@ -161,7 +162,6 @@ export default {
       }
     },
     backRollingY() {
-      console.log('backRollingY')
       const firstRect = this._itemRect
       const rect = this._carouselRect
       const scap = firstRect.top - rect.top
