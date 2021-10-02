@@ -47,13 +47,13 @@ export default {
     this._carouselRect = {}
     this._itemNum = 0
     this._carousel = null
-    this.rollingState = false // 滚动状态,
-    this.onEnd = false // 滚动至最后一个元素停止
-    this.headItemIndex = 0 // 滚动值第几个子元素
+    // this.rollingState = false // 滚动状态,
+    // this.onEnd = false // 滚动至最后一个元素停止
+    // this.headItemIndex = 0 // 滚动值第几个子元素
     return {
-      // rollingState: false, // 滚动状态,
-      // onEnd: false, // 滚动至最后一个元素停止
-      // headItemIndex: 0, // 滚动值第几个子元素
+      rollingState: false, // 滚动状态,
+      onEnd: false, // 滚动至最后一个元素停止
+      headItemIndex: 0, // 滚动值第几个子元素
       isHover: false, // 鼠标是否移入
       isVertical: this.direction === 'vertical',
     }

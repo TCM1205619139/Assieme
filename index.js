@@ -1,3 +1,4 @@
+/* eslint-disable */
 import 'normalize.css'
 import './assets/icon/css/font-awesome.min.css'
 import AJSON from './packages/AJSON/index'
