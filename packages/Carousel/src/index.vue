@@ -1,17 +1,37 @@
+<!--
+使用说明：carousel父元素给一个固定宽高的容器（父元素不需要添加overflow：auto），carousel中包裹需要滚动的子元素，当子组件超出父组件的高度或者宽度时
+
+示例：
+<div style="width: 200px;">
+  <carousel :pauseTime="1000" :direction="'horizontal'" :speed="1">
+    <div class="item" style="width: 100px; height: 100px; background-color: red"></div>
+    <div class="item" style="width: 100px; height: 100px; background-color: yellow"></div>
+    <div class="item" style="width: 100px; height: 100px; background-color: blue"></div>
+    <div class="item" style="width: 100px; height: 100px; background-color: green"></div>
+    <div class="item" style="width: 100px; height: 100px; background-color: orange"></div>
+    <div class="item" style="width: 100px; height: 100px; background-color: pink"></div>
+  </carousel>
+</div>
+
+
+************************
+coding by：tangchenming
+************************
+-->
 <template>
   <div
-    class="carousel-container"
-    :class="{
-      'carousel-container-hover': isHover,
-      'carousel-container-vertical': isVertical,
-      'carousel-container-horizontal': !isVertical,
-    }"
-    ref="carousel"
-    @mouseleave="mouseleaveFn"
-    @mouseover="mouseoverFn"
-    @scroll="listenScrollFn($event)"
+      class="_carousel-container"
+      :class="{
+        '_carousel-container-hover': isHover,
+        '_carousel-container-vertical': isVertical,
+        '_carousel-container-horizontal': !isVertical,
+      }"
+      ref="carousel"
+      @mouseleave="mouseleaveFn"
+      @mouseover="mouseoverFn"
+      @scroll="listenScrollFn($event)"
   >
-    <div :class="getClassName" ref="itemList">
+    <div ref="itemList" :class="getClassName">
       <slot></slot>
     </div>
   </div>
@@ -21,7 +41,7 @@
   export default {
     rollingTimer: null, // 滚动定时器，用于绑定 requestAnimationFrame
     pauseTimer: null, // 暂停定时器，用于绑定 setTimeout
-    name: 'CarouselAlarm',
+    name: 'Carousel',
     props: {
       direction: {
         type: String,
@@ -58,20 +78,29 @@
         isVertical: this.direction === 'vertical',
       }
     },
-    mounted() {
-      this._carousel = this.$refs.carousel
-      this._itemList = this.$refs.itemList
-      this._itemRect = this.cloneRect(this._itemList.firstChild.getBoundingClientRect())
-      this._carouselRect = this.cloneRect(this._carousel.getBoundingClientRect())
-
-      this.startRolling()
-    },
     computed: {
       getClassName () {
         return this.direction === 'vertical' ? 'carousel-item-vertical' : 'carousel-item-horizontal'
       }
     },
+    mounted() {
+      this._carousel = this.$refs.carousel
+      this._itemList = this.$refs.itemList
+      this._itemRect = this.cloneRect(this._itemList.firstChild?.getBoundingClientRect())
+      this._carouselRect = this.cloneRect(this._carousel.getBoundingClientRect())
+      this.rollingState = true
+      this._itemNum = this._itemList.children.length
+      this.startRolling()
+    },
     methods: {
+      rerender () {
+        this._carousel = this.$refs.carousel
+        this._itemList = this.$refs.itemList
+        this._itemRect = this.cloneRect(this._itemList.firstChild?.getBoundingClientRect())
+        this._carouselRect = this.cloneRect(this._carousel.getBoundingClientRect())
+        this.rollingState = true
+        this._itemNum = this._itemList.children.length
+      },
       cloneRect(rect) {
         // getBoundingClientRect()是个只读属性，需要进行拷贝
         let newRect = {}
@@ -82,7 +111,7 @@
       },
       mouseleaveFn() {
         this.isHover = false
-        this._scrollCash = undefined
+        this.rerender()
         this.startRolling()
       },
       mouseoverFn() {
@@ -111,7 +140,6 @@
       },
       startRolling() {
         // 所有子元素的高度足撑开元素，才需要滚动
-        this._itemNum = this._itemList.children.length
         if (this.isVertical && this._itemRect.height * this._itemNum > this._carouselRect.height) {
           this.rollingToY()
         } else if (!this.isVertical && this._itemRect.width * this._itemNum > this._carouselRect.width) {
@@ -194,19 +222,13 @@
 
         this.pauseTimer = !this.isHover && setTimeout(this.startRolling, this.pauseTime)
       }
-    },
-    watch: {
-      rollingState () { // 解决vue-devtool没有更新组件状态的问题
-      },
-      headItemIndex () { // 解决vue-devtool没有更新组件状态的问题
-      }
     }
   }
 </script>
 <style scoped>
   @keyframes layout {
   }
-  .carousel-container {
+  ._carousel-container {
     width: 100%;
     height: 100%;
     display: flex;
@@ -214,44 +236,44 @@
     overflow: hidden;
     user-select: none;
   }
-  .carousel-container-hover {
+  ._carousel-container-hover {
     overflow: auto;
   }
-  .carousel-container-vertical::-webkit-scrollbar {
+  ._carousel-container-vertical::-webkit-scrollbar {
     /*滚动条整体样式*/
     width: 5px; /*高宽分别对应横竖滚动条的尺寸*/
     height: 4px;
     scrollbar-arrow-color: red;
   }
-  .carousel-container-horizontal::-webkit-scrollbar {
+  ._carousel-container-horizontal::-webkit-scrollbar {
     /*滚动条整体样式*/
     width: 5px; /*高宽分别对应横竖滚动条的尺寸*/
     height: 4px;
     scrollbar-arrow-color: red;
   }
-  .carousel-container::-webkit-scrollbar-thumb {
+  ._carousel-container::-webkit-scrollbar-thumb {
     /*滚动条里面小方块*/
     border-radius: 10px;
     -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     background: #324a71;
     scrollbar-arrow-color: red;
   }
-  .carousel-container::-webkit-scrollbar-track {
+  ._carousel-container::-webkit-scrollbar-track {
     /*滚动条里面轨道*/
     -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     border-radius: 0;
     background: rgba(0, 0, 0, 0.1);
   }
   .carousel-item-vertical {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*justify-content: flex-start;*/
+    /*align-items: center;*/
   }
   .carousel-item-horizontal {
     display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
+    /*flex-direction: row;*/
+    /*justify-content: flex-start;*/
+    /*align-items: center;*/
   }
 </style>
