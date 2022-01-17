@@ -2,7 +2,6 @@
   <div
     class="_drag-box"
     :style="boxStyle"
-    @mouseup="onMouseup"
     @mousedown="onMousedown"
     ref="dragBox"
   >
@@ -41,6 +40,14 @@
         type: Boolean,
         required: false,
         default: true
+      },
+      position: {
+        type: String,
+        required: false,
+        default: 'absolute',
+        validator(value) {
+          return ['fixed', 'absolute'].indexOf(value) !== -1
+        }
       }
     },
     data () {
@@ -71,7 +78,7 @@
         : {
             width: this.size[0] + 'px',
             height: this.size[1] + 'px',
-            position: 'fixed'
+            position: this.position
           }
       }
     },
@@ -90,10 +97,11 @@
         document.documentElement.addEventListener('mousemove', this.onMousemove)
         document.documentElement.addEventListener('mouseup', this.onMouseup)
       },
-      onMouseup () {
+      onMouseup (e) {
         this.preventEvent = false
         this.dragging = false
         document.documentElement.removeEventListener('mousemove', this.onMousemove)
+        this.overflowRevert && this.revertBox(e)
       },
       onMousemove (e) {
         this.preventEvent = true
@@ -114,6 +122,30 @@
         } else {
           this.dragBox.style.left = moveStyle.left + 'px'
           this.dragBox.style.top = moveStyle.top + 'px'
+        }
+      },
+      revertBox (e) {
+        let offsetParent = null
+
+        this.position === 'absolute'
+        ? offsetParent = this.dragBox.offsetParent
+        : offsetParent = document.documentElement
+
+        const parentWidth = offsetParent.clientWidth
+        const parentHeight = offsetParent.clientHeight
+        const { offsetTop, offsetLeft, clientWidth, clientHeight } = this.dragBox
+        const offsetRight = parentWidth - offsetLeft - clientWidth
+        const offsetBottom = parentHeight - offsetTop - clientHeight
+
+        offsetLeft < 0 && (this.dragBox.style.left = 0 + 'px')
+        offsetTop < 0 && (this.dragBox.style.top = 0 + 'px')
+        if (offsetRight < 0) {
+          this.dragBox.style.left = ''
+          this.dragBox.style.right = 0 + 'px'
+        }
+        if (offsetBottom < 0) {
+          this.dragBox.style.top = ''
+          this.dragBox.style.bottom = 0 + 'px'
         }
       }
     }
