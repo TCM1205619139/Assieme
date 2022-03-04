@@ -1,4 +1,4 @@
-import Carousel from './src/index'
+import Carousel from './src'
 
 Carousel.install = function (Vue) {
   Vue.component(Carousel.name, Carousel)
