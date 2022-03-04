@@ -7,7 +7,6 @@ const object2BeautifulString = (o) => {
 
   const dfs = (obj) => {
     for (let key in obj) {
-      // @ts-ignore
       let tmp = obj[key]
       if (typeof tmp === 'object') {
         result += `${key}: {`
@@ -36,7 +35,6 @@ const object2String = (o) => {
       textIndent += ' '
     }
     for (let key in obj) {
-      // @ts-ignore
       let tmp = obj[key]
       if (typeof tmp === 'object') {
         result += `${textIndent}${key} : {\n`
