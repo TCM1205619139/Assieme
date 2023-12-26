@@ -1,3 +1,7 @@
 .idea
+
+.cache
+.temp
+
 /test
-/node_modules
+node_modules
