@@ -1,0 +1,30 @@
+{
+  "name": "@assieme/carousel",
+  "version": "0.0.0",
+  "description": "自动滚动组件",
+  "keywords": [
+    "auto-scroll",
+    "direction"
+  ],
+  "author": "SweetTang <tangchenming0011@gmail.com>",
+  "homepage": "https://github.com/TCM1205619139/Assieme#readme",
+  "license": "ISC",
+  "main": "lib/carousel.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TCM1205619139/Assieme.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/carousel.test.js"
+  },
+  "bugs": {
+    "url": "https://github.com/TCM1205619139/Assieme/issues"
+  }
+}
