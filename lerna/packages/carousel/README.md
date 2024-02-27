@@ -1,11 +1,11 @@
-# `carousel`
+# `index`
 
 > TODO: description
 
 ## Usage
 
 ```
-const carousel = require('carousel');
+const index = require('index');
 
 // TODO: DEMONSTRATE API
 ```

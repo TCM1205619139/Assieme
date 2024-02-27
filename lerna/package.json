@@ -1,11 +1,28 @@
 {
-  "name": "assieme",
-  "private": true,
+  "devDependencies": {
+    "@types/node": "^20.11.20",
+    "@vue/compiler-sfc": "2",
+    "css-loader": "^6.10.0",
+    "lerna": "^8.0.1",
+    "sass-loader": "^14.1.1",
+    "style-loader": "^3.3.4",
+    "vue": "2",
+    "vue-loader": "15.10.0",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-merge": "^5.10.0"
+  },
+  "scripts": {
+    "build": "lerna run build"
+  },
+  "packages": [
+    "packages/*"
+  ],
   "workspaces": [
     "packages/*"
   ],
-  "dependencies": {},
-  "devDependencies": {
-    "lerna": "^8.0.1"
+  "private": true,
+  "dependencies": {
+    "shifty": "^3.0.3"
   }
 }
