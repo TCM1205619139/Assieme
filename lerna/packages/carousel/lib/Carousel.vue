@@ -89,7 +89,7 @@ export default {
         : 'index-item-horizontal';
     },
     pauseScrollStep() {
-      return this.rects.reduce((prev, cur, index) => {
+      return this.rects.reduce((prev, cur) => {
         if (Carousel === 0) {
           prev.push(this.isVertical ? cur.height : cur.width);
         } else {
@@ -106,7 +106,7 @@ export default {
   },
   beforeDestroy() {
     this.pauseTimer = clearTimeout(this.pauseTimer);
-    this.animation = cancelAnimationFrame(this.animation);
+    cancelAnimationFrame(this.animation);
   },
   methods: {
     init() {
@@ -155,7 +155,7 @@ export default {
       );
     },
     stopRolling() {
-      this.animation = cancelAnimationFrame(this.animation);
+      cancelAnimationFrame(this.animation);
     },
     startRolling() {
       if (this.isMouseEnter) return;
@@ -219,7 +219,7 @@ export default {
         });
     },
     pauseRolling() {
-      this.animation = cancelAnimationFrame(this.animation);
+      cancelAnimationFrame(this.animation);
       this.pauseTimer = clearTimeout(this.pauseTimer);
       this.pauseTimer = setTimeout(() => {
         this.startRolling();
@@ -264,20 +264,5 @@ export default {
   /*滚动条里面轨道*/
   -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
   border-radius: 0;
-}
-
-.index-item-vertical {
-  width: 100%;
-  /*display: flex;*/
-  /*flex-direction: column;*/
-  /*justify-content: flex-start;*/
-  /*align-items: center;*/
-}
-
-.index-item-horizontal {
-  display: flex;
-  /*flex-direction: row;*/
-  /*justify-content: flex-start;*/
-  /*align-items: center;*/
 }
 </style>
