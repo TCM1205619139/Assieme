@@ -1,6 +1,18 @@
-import { defineUserConfig, defaultTheme } from 'vuepress'
+import { defineUserConfig } from 'vuepress'
+import { defaultTheme } from '@vuepress/theme-default'
+import { getDirname, path } from 'vuepress/utils'
+import { viteBundler } from '@vuepress/bundler-vite'
+import { registerComponentsPlugin } from '@vuepress/plugin-register-components'
+
+// @ts-ignore
+const __dirname = getDirname(import.meta.url)
+console.log(registerComponentsPlugin)
 
 export default defineUserConfig({
+  bundler: viteBundler({
+    viteOptions: {},
+    vuePluginOptions: {},
+  }),
   theme: defaultTheme({
     sidebar: [
       {
@@ -28,5 +40,12 @@ export default defineUserConfig({
         ]
       }
     ]
-  })
+  }),
+  plugins: [
+    registerComponentsPlugin({
+      components: {
+        CarouselDemo: path.resolve(__dirname, './components/CarouselDemo.vue')
+      }
+    })
+  ]
 })
