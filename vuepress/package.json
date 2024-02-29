@@ -1,0 +1,15 @@
+{
+  "name": "assieme-vuepress",
+  "license": "MIT",
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  },
+  "dependencies": {
+    "carousel": "../lerna/packages/carousel",
+    "vuepress": "^1.9.10"
+  },
+  "engines": {
+    "node": "18.16.0"
+  }
+}
