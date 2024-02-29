@@ -22,7 +22,7 @@
   },
   "scripts": {
     "test": "node ./__tests__/carousel.test.js",
-    "build": "webpack --config ./webpack.config.js"
+    "build": "webpack --config ./webpack.config.js -w"
   },
   "bugs": {
     "url": "https://github.com/TCM1205619139/Assieme/issues"

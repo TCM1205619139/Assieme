@@ -3,14 +3,14 @@
 
 示例：
 <div style="width: 200px;">
-  <index :pauseTime="1000" :direction="'horizontal'" :speed="1">
+  <carousel :pauseTime="1000" :direction="'horizontal'" :speed="1">
     <div class="item" style="width: 100px; height: 100px; background-color: red"></div>
     <div class="item" style="width: 100px; height: 100px; background-color: yellow"></div>
     <div class="item" style="width: 100px; height: 100px; background-color: blue"></div>
     <div class="item" style="width: 100px; height: 100px; background-color: green"></div>
     <div class="item" style="width: 100px; height: 100px; background-color: orange"></div>
     <div class="item" style="width: 100px; height: 100px; background-color: pink"></div>
-  </index>
+  </carousel>
 </div>
 
 
@@ -20,7 +20,7 @@ coding by：tangchenming
 -->
 <template>
   <div
-    ref="index"
+    ref="carousel"
     class="_carousel-container"
     :class="{
       '_carousel-container-hover': isMouseEnter,
@@ -29,11 +29,12 @@ coding by：tangchenming
     }"
     @mouseleave="mouseleaveFn"
     @mouseover="mouseoverFn"
-    @scroll="listenScrollFn($event)"
   >
+    <div class="start" ref="start"></div>
     <div ref="itemList" :class="getClassName">
       <slot></slot>
     </div>
+    <div class="end" ref="end"></div>
   </div>
 </template>
 
@@ -65,15 +66,20 @@ export default {
     },
   },
   data() {
-    this.animation = null;
-    this.pauseTimer = null;
-    this.index = null;
+    // TODO 可以通过设置每一帧滚动步长进行滚动（已实现），也可以通过设置滚动持续时间进行滚动（未实现）
+    this.animation = null
+    this.pauseTimer = null  // 暂停滚动定时器
+    this.resizeObservers = [] // 收集slot中所有的子元素 --- 监听大小改变
+    this.intersectionObservers = []  // 收集slot中所有的子元素 --- 监听出现/离开
+    this.startIntersectionObserver = null // 监听第一个宽高为0的元素
+    this.endIntersectionObserver = null // 监听最后一个宽高为0的元素
     return {
-      carouselRect: {},
-      isMouseEnter: false,
-      rects: [],
-      index: -1,
-      targetIndex: 0,
+      isMouseEnter: false,  // 鼠标是否移入
+      index: -1,  // 当前滚动到哪一个元素，从左往右，从上往下
+      isBackRolling: false, // 是否回滚中
+      isInStart: false, // 是否滚动到第一个
+      isInEnd: false,  // 是否滚动到最后一个
+      needResize: false,
     };
   },
   computed: {
@@ -85,150 +91,140 @@ export default {
     },
     getClassName() {
       return this.isVertical
-        ? 'index-item-vertical'
-        : 'index-item-horizontal';
+        ? 'carousel-item-vertical'
+        : 'carousel-item-horizontal';
     },
-    pauseScrollStep() {
-      return this.rects.reduce((prev, cur) => {
-        if (Carousel === 0) {
-          prev.push(this.isVertical ? cur.height : cur.width);
-        } else {
-          prev.push(
-            prev[prev.length - 1] + (this.isVertical ? cur.height : cur.width),
-          );
-        }
-        return prev;
-      }, []);
-    },
+  },
+  watch: {
+    needResize: {
+      immediate: false,
+      handler (val) {
+        if (!val) return
+        this.pauseRolling().then(this.startRolling)
+        this.createObservers()
+      }
+    }
   },
   mounted() {
-    this.init();
+    // TODO 如果外层改变了 $slots 的内容，会导致瞬间闪烁到最顶部，需要优化
+    this.createObservers()
+    // this.startRolling()
   },
   beforeDestroy() {
-    this.pauseTimer = clearTimeout(this.pauseTimer);
-    cancelAnimationFrame(this.animation);
   },
   methods: {
-    init() {
-      this.calcRects();
-      this.targetIndex = this.index + 1;
-      this.pauseTimer = clearTimeout(this.pauseTimer);
-      this.pauseTimer = setTimeout(() => {
-        this.startRolling();
-      }, this.pauseTime);
-      const observer = new ResizeObserver(() => {
-        this.calcRects();
-      });
-      observer.observe(this.$refs.itemList);
-    },
-    calcRects() {
-      this.index = this.$refs.index;
-      this.carouselRect = this.index.getBoundingClientRect();
-      this.rects = [];
-      const itemList = this.$refs.itemList;
-      const length = itemList.children.length;
-      for (let i = 0; i < length; i++) {
-        const rect = itemList.children[i].getBoundingClientRect();
-        this.rects.push({
-          width: rect.width,
-          height: rect.height,
-        });
+    createObservers () {
+      const slotNodes = this.$refs.itemList.childNodes || []
+
+      const items = Array.from(slotNodes).filter(node => {
+        return node.nodeType === 1
+      })
+      this.resizeObservers.forEach((observer) => {
+        observer.disconnect()
+      })
+      this.intersectionObservers.forEach(observer => {
+        observer.disconnect()
+      })
+      this.resizeObservers = []
+      this.intersectionObservers = []
+
+      for (const element of items) {
+        const resizeObserver = new ResizeObserver(() => {
+          this.needResize = true
+        })
+        const intersectionObserver = new IntersectionObserver((entry) => {
+          const { isIntersecting } = entry[0]
+          if (isIntersecting) return
+          this.pauseRolling().then(this.startRolling)
+        })
+        this.startIntersectionObserver = new IntersectionObserver((entry) => {
+          const { isIntersecting } = entry[0]
+          this.isInStart = isIntersecting
+        })
+        this.endIntersectionObserver = new IntersectionObserver((entry) => {
+          const { isIntersecting } = entry[0]
+          this.isInEnd = isIntersecting
+        })
+
+        resizeObserver.observe(element)
+        intersectionObserver.observe(element)
+
+        this.startIntersectionObserver.observe(this.$refs.start)
+        this.endIntersectionObserver.observe(this.$refs.end)
+        this.resizeObservers.push(resizeObserver)
+        this.intersectionObservers.push(intersectionObserver)
       }
     },
-    mouseleaveFn() {
-      this.isMouseEnter = false;
-      this.pauseRolling();
-    },
-    mouseoverFn() {
-      this.isMouseEnter = true;
-      this.stopRolling();
-    },
-    listenScrollFn(e) {
-      if (!this.isMouseEnter) return;
-      this.index =
-        this.pauseScrollStep.findIndex(item => {
-          return item >= e.target.scrollTop;
-        }) - 1;
-      this.targetIndex = Math.min(
-        this.pauseScrollStep.length - 1,
-        this.index + 1,
-      );
-    },
-    stopRolling() {
-      cancelAnimationFrame(this.animation);
-    },
-    startRolling() {
-      if (this.isMouseEnter) return;
-      if (this.isVertical) {
-        this.rollingToY();
-      } else {
-        this.rollingToX();
+    startRolling () {
+      if (this.isInEnd) {
+        cancelAnimationFrame(this.animation)
+        this.pauseRolling().then(this.rollingToStart)
+        return
       }
-    },
-    rollingToX() {},
-    rollingToY() {
-      const targetScrollTop = this.pauseScrollStep[this.targetIndex];
-      const scrollTop = this.index.scrollTop;
-      // console.log(this.carouselRect.height >= this.pauseScrollStep[this.pauseScrollStep.length - 1] - scrollTop - this.scrollSpeed)
-      if (
-        this.carouselRect.height >=
-        this.pauseScrollStep[this.pauseScrollStep.length - 1] -
-          scrollTop -
-          this.scrollSpeed
-      ) {
-        this.pauseTimer = setTimeout(() => {
-          this.index = -1;
-          this.targetIndex = 0;
-          this.backRollingY();
-        }, this.pauseTime);
+      if (this.isMouseEnter) {
+        cancelAnimationFrame(this.animation)
+        this.pauseRolling().then(this.startRolling)
         return;
       }
-      this.index.scrollTop = scrollTop + this.scrollSpeed;
-      if (this.index.scrollTop >= targetScrollTop) {
-        this.index = this.targetIndex;
-        this.targetIndex = this.index + 1;
-        this.pauseRolling();
+      this.rollingToEnd()
+      this.animation = requestAnimationFrame(this.startRolling)
+    },
+    pauseRolling () {
+      return new Promise(resolve => {
+        cancelAnimationFrame(this.animation)
+        this.pauseTimer = clearTimeout(this.pauseTimer)
+        this.pauseTimer = setTimeout(() => {
+          resolve()
+        }, this.pauseTime)
+      })
+    },
+    rollingToEnd () {
+      if (this.isVertical) {
+        this.$refs.carousel.scrollTop += this.speed
       } else {
-        this.animation = requestAnimationFrame(this.startRolling);
+        this.$refs.carousel.scrollLeft += this.speed
       }
     },
-    backRollingX() {},
-    backRollingY() {
-      const scrollTop = this.index.scrollTop;
-      const $this = this;
+    rollingToStart () {
+      const carousel = this.$refs.carousel
+      const scrollTop = carousel.scrollTop
+      const scrollLeft = carousel.scrollLeft
       tween({
-        render({ y }) {
-          $this.index.scrollTop = y;
+        render({ x, y }) {
+          this.isBackRolling = true
+          carousel.scrollLeft = x;
+          carousel.scrollTop = y;
         },
         easing: 'easeInOutCubic',
         duration: this.pauseTime,
         from: {
           y: scrollTop,
+          x: scrollLeft
         },
         to: {
           y: 0,
+          x: 0
         },
       })
         .then(() => {
-          return new Promise(resolve => {
-            this.pauseTimer = setTimeout(resolve, this.pauseTime);
-          });
+          this.isBackRolling = false
+          return this.pauseRolling()
         })
         .then(() => {
           this.startRolling();
         });
     },
-    pauseRolling() {
-      cancelAnimationFrame(this.animation);
-      this.pauseTimer = clearTimeout(this.pauseTimer);
-      this.pauseTimer = setTimeout(() => {
-        this.startRolling();
-      }, this.pauseTime);
+    mouseleaveFn () {
+      this.isMouseEnter = false
     },
-  },
+    mouseoverFn () {
+      this.isMouseEnter = true
+    }
+  }
 };
 </script>
-<style scoped>
+<style scoped lang="scss">
+
 ._carousel-container {
   width: 100%;
   height: 100%;
@@ -242,16 +238,34 @@ export default {
   overflow: auto;
 }
 
-._carousel-container-vertical::-webkit-scrollbar {
-  /*滚动条整体样式*/
-  width: 0; /*高宽分别对应横竖滚动条的尺寸*/
-  height: 4px;
+._carousel-container-vertical {
+  flex-direction: column;
+
+  .carousel-item-vertical {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width: 4px; /*高宽分别对应横竖滚动条的尺寸*/
+    height: 4px;
+  }
 }
 
-._carousel-container-horizontal::-webkit-scrollbar {
-  /*滚动条整体样式*/
-  width: 5px; /*高宽分别对应横竖滚动条的尺寸*/
-  height: 4px;
+._carousel-container-horizontal {
+  flex-direction: row;
+
+  .carousel-item-horizontal {
+    display: flex;
+    flex-direction: row;
+  }
+
+  &::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width: 5px; /*高宽分别对应横竖滚动条的尺寸*/
+    height: 4px;
+  }
 }
 
 ._carousel-container::-webkit-scrollbar-thumb {
@@ -264,5 +278,10 @@ export default {
   /*滚动条里面轨道*/
   -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
   border-radius: 0;
+}
+
+.start, .end {
+  width: 1px;
+  height: 1px;
 }
 </style>

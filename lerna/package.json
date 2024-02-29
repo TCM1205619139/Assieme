@@ -23,6 +23,7 @@
   ],
   "private": true,
   "dependencies": {
+    "sass": "^1.71.1",
     "shifty": "^3.0.3"
   }
 }

@@ -8,9 +8,7 @@ module.exports = {
     chunkFilename: (pathData) => {
       return pathData.chunk.name === 'main' ? '[name].js' : '[name]/[name].js';
     },
-    clean: true,
-    filename: 'index.js',
-    path: path.resolve(__dirname, 'dist'),
+    clean: true
   },
   module: {
     rules: [
