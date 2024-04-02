@@ -7,8 +7,7 @@
     "@vuepress/theme-default": "^2.0.0-rc.17"
   },
   "dependencies": {
-    "vuepress": "^2.0.0-rc.8",
-    "carousel": "../lerna/packages/carousel"
+    "vuepress": "^2.0.0-rc.8"
   },
   "scripts": {
     "docs:dev": "vuepress dev docs",

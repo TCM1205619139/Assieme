@@ -1,5 +1,5 @@
 <script>
-  import Carousel from '../../../../lerna/packages/carousel/dist/index'
+  import Carousel from 'carousel'
 
   export default {
     name: 'CarouselDemoHorizontal',
