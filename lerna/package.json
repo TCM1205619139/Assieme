@@ -1,12 +1,18 @@
 {
   "devDependencies": {
+    "@babel/core": "^7.24.3",
+    "@babel/preset-env": "^7.24.3",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.11.20",
+    "@types/uuid": "^9.0.8",
     "@vue/compiler-sfc": "2",
     "css-loader": "^6.10.0",
     "lerna": "^8.0.1",
+    "rollup": "^4.13.2",
     "sass-loader": "^14.1.1",
     "style-loader": "^3.3.4",
-    "vue": "2",
+    "ts-node": "^10.9.2",
     "vue-loader": "15.10.0",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4",
@@ -24,6 +30,9 @@
   "private": true,
   "dependencies": {
     "sass": "^1.71.1",
-    "shifty": "^3.0.3"
+    "shifty": "^3.0.3",
+    "typescript": "^5.4.3",
+    "uuid": "^9.0.1",
+    "vue": "2"
   }
 }

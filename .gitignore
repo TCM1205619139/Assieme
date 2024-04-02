@@ -3,6 +3,7 @@
 
 .cache
 .temp
+*.log
 
 /test
 dist
