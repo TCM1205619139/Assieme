@@ -15,7 +15,7 @@
 
 
 ************************
-coding by：tangchenming
+coding by：SweetTang
 ************************
 -->
 <template>
@@ -83,9 +83,9 @@ export default {
     };
   },
   computed: {
-    scrollSpeed() {
-      return this.speed + 1;
-    },
+    // scrollSpeed() {
+    //   return this.speed + 1;
+    // },
     isVertical() {
       return this.direction === 'vertical';
     },
@@ -172,7 +172,7 @@ export default {
     pauseRolling () {
       return new Promise(resolve => {
         cancelAnimationFrame(this.animation)
-        this.pauseTimer = clearTimeout(this.pauseTimer)
+        clearTimeout(this.pauseTimer)
         this.pauseTimer = setTimeout(() => {
           resolve()
         }, this.pauseTime)
