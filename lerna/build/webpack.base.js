@@ -16,6 +16,18 @@ module.exports = {
         loader: 'vue-loader'
       },
       {
+        test: /\.m?js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+            ],
+          },
+        },
+      },
+      {
         test: /\.s[ac]ss$/i,
         use: [
           'style-loader',
@@ -30,7 +42,9 @@ module.exports = {
     ]
   },
   plugins: [
-    // make sure to include the plugin!
     new VueLoaderPlugin()
-  ]
+  ],
+  experiments: {
+    outputModule: true
+  }
 }

@@ -1,8 +1,8 @@
-import typescript from '@rollup/plugin-typescript'
-import { getBabelOutputPlugin } from '@rollup/plugin-babel'
-// import resolve from '@rollup/plugin-node-resolve'
+import { merge } from 'lodash-es'
+import RollupBaseConfig from '../../build/rollup.base.js'
 
-export default {
+
+export default merge(RollupBaseConfig, {
   input: 'lib/index.ts',
   output: [
     {
@@ -18,14 +18,5 @@ export default {
       format: 'umd',
       name: 'CanvasModule'
     }
-  ],
-  plugins: [
-    typescript({
-      module: 'ES2015'
-    }),
-    getBabelOutputPlugin({
-      presets: ['@babel/preset-env'],
-      allowAllFormats: true
-    })
   ]
-}
+})

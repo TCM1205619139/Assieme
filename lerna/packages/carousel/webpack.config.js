@@ -1,8 +1,8 @@
 const path = require('node:path')
-const { merge } = require('webpack-merge')
-const webpackCommonConfig = require('../../build/webpack.config')
+const merge = require('lodash/merge')
+const webpackBaseConfig = require('../../build/webpack.base')
 
-module.exports = merge(webpackCommonConfig, {
+module.exports = merge(webpackBaseConfig, {
   entry: path.resolve(__dirname, 'lib/index.js'),
   output: {
     filename: 'index.js',
@@ -10,8 +10,5 @@ module.exports = merge(webpackCommonConfig, {
     library: {
       type: 'module',
     }
-  },
-  experiments: {
-    outputModule: true
   }
 })
