@@ -1,11 +1,11 @@
-# `index`
+# `canvas`
 
 > TODO: description
 
 ## Usage
 
 ```
-const index = require('index');
+const canvas = require('canvas');
 
 // TODO: DEMONSTRATE API
 ```

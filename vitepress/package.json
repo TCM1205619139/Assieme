@@ -1,9 +1,19 @@
 {
+  "name": "assieme-vitepress",
+  "license": "MIT",
   "devDependencies": {
-    "vuepress": "^2.0.0-rc.0"
+    "@vuepress/bundler-vite": "^2.0.0-rc.8",
+    "@vuepress/plugin-register-components": "^2.0.0-rc.15",
+    "@vuepress/theme-default": "^2.0.0-rc.17"
+  },
+  "dependencies": {
+    "vuepress": "^2.0.0-rc.8"
   },
   "scripts": {
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs"
+  },
+  "engines": {
+    "node": "18.16.0"
   }
 }

@@ -1,0 +1,21 @@
+{
+  "name": "assieme",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lerna:build": "cd lerna && yarn build",
+    "docs:vitepress:dev": "cd vitepress && yarn docs:dev",
+    "docs:vuepress:dev": "cd vuepress && yarn docs:dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TCM1205619139/Assieme.git"
+  },
+  "author": "SweetTang",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TCM1205619139/Assieme/issues"
+  },
+  "homepage": "https://github.com/TCM1205619139/Assieme#readme"
+}
