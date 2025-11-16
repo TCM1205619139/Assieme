@@ -1,0 +1,26 @@
+{
+  "name": "tc-toolkit",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "author": "TCM1205619139 <tangchenming0011@gmail.com>",
+  "homepage": "https://github.com/TCM1205619139/Assieme#readme",
+  "license": "ISC",
+  "main": "lib/tc-toolkit.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TCM1205619139/Assieme.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/tc-toolkit.test.js"
+  },
+  "bugs": {
+    "url": "https://github.com/TCM1205619139/Assieme/issues"
+  }
+}

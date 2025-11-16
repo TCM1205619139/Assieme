@@ -134,7 +134,7 @@ var ApiProxy = class {
   }
 };
 
-// node_modules/@vue/devtools-api/lib/esm/index.js
+// node_modules/@vue/devtools-api/lib/esm/tc-toolkit.js
 function setupDevtoolsPlugin(pluginDescriptor, setupFn) {
   const descriptor = pluginDescriptor;
   const target = getTarget();
